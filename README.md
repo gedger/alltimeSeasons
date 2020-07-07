@@ -38,3 +38,4 @@ Finally edit your weewx.conf file and change the skin to your new skin, I just c
 
 In theory that's all. However, although I have done this on my own system I haven't actually followed these instructions on a clean install to confirm they work. If you try you may well be the first. If you find a problem then please let me know and I'll do my best to correct it.
 
+NOTE: This will only work with weewx V4.00 and later

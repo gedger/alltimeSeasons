@@ -9,6 +9,8 @@ I also wanted to able to compare temperature and perhaps wind. Surprisingly the 
 due to its excellent design it's fairly straightforward to add a new skin to do what you want. I really liked the, no standard, Season skin so I used 
 that as a starting point. Here are some screen shots of the results.
 
-![Frontpage](screenshots/Frontpage.jpeg =250x)
+![](screenshots/Frontpage.png)
+![](screenshots/Statistics.png)
+
 
 https://github.com/brewster76/fuzzy-archer

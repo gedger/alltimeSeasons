@@ -9,7 +9,7 @@ I also wanted to able to compare temperature and perhaps wind. Surprisingly the 
 due to its excellent design it's fairly straightforward to add a new skin to do what you want. I really liked the, now standard, Season skin so I used 
 that as a starting point. Here are some screen shots of the results.
 
-<img src="screenshots/Frontpage.png" alt="Frontpage" width="50"/><img src="screenshots/Statistics.png" alt="Statistics" width="50"/>
+<img src="screenshots/Frontpage.png" alt="Frontpage" width="100"/>&nbsp;&nbsp;&nbsp;&nbsp;<img src="screenshots/Statistics.png" alt="Statistics" width="100"/>
 
 ## Solution
 
@@ -30,11 +30,11 @@ Then copy the historygenerator.py file provided in the user/bin directory to the
 
 Finally edit your weewx.conf file and change the skin to your new skin, I just changed the original to point to the new location.
 
-[[SeasonsReport]]
-        # The SeasonsReport uses the 'Seasons' skin, which contains the
-        # images, templates and plots for the report.
-        skin = alltimeSeasons
-        enable = true
+        [[SeasonsReport]]
+                # The SeasonsReport uses the 'Seasons' skin, which contains the
+                # images, templates and plots for the report.
+                skin = alltimeSeasons
+                enable = true
 
 In theory that's all. However, although I have done this on my own system I haven't actually followed these instructions on a clean install to confirm they work. If you try you may well be the first. If you find a problem then please let me know and I'll do my best to correct it.
 

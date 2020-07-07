@@ -9,14 +9,14 @@ I also wanted to able to compare temperature and perhaps wind. Surprisingly the 
 due to its excellent design it's fairly straightforward to add a new skin to do what you want. I really liked the, now standard, Season skin so I used 
 that as a starting point. Here are some screen shots of the results.
 
-<img src="screenshots/Frontpage.png" alt="Frontpage" width="100"/>&nbsp;&nbsp;&nbsp;&nbsp;<img src="screenshots/Statistics.png" alt="Statistics" width="100"/>
+<img src="screenshots/Frontpage.png" alt="Frontpage" width="200"/>&nbsp;&nbsp;&nbsp;&nbsp;<img src="screenshots/Statistics.png" alt="Statistics" width="200"/>
 
 ## Solution
 
-The grunt of the work was done by brewster76 with his new skin based using Bootstrap, indeed you may prefer his solution as it also includes gauges 
+The grunt of the work was done by brewster76 with his new skin using Bootstrap, indeed you may prefer his solution as it also includes gauges 
 and a full installer. Check it out here https://github.com/brewster76/fuzzy-archer
 
-I used his python code to generate the actual historic tables and then modified the seasons template to include the results.
+I used his, very slightly modified, python code to generate the actual historic tables and then modified the Seasons template to include the results.
 
 ## Installation
 
@@ -26,7 +26,7 @@ First make a copy of the Seasons skin including all the sub directories. I calle
 
 Then replace the files in the new alltimeSeasons with those provided here.
 
-Then copy the historygenerator.py file provided in the user/bin directory to the user bin directory in your weefx installation. Note this is different depending on how you installed weewx. If you installed via DEB/RPM then its /usr/share/weewx/user if you installed using setup.py then its /home/weewx/bin/user.
+Then copy the historygenerator.py file provided in the user/bin directory to the user bin directory in your weewx installation. Note this is different depending on how you installed weewx. If you installed via DEB/RPM then its /usr/share/weewx/user if you installed using setup.py then its /home/weewx/bin/user.
 
 Finally edit your weewx.conf file and change the skin to your new skin, I just changed the original to point to the new location.
 

@@ -47,6 +47,8 @@
                onclick="choose_history('month')">$gettext("Month")</a>
             <a class="button" id="button_history_year"
                onclick="choose_history('year')">$gettext("Year")</a>
+            <a class="button" id="button_history_alltime"
+               onclick="choose_history('alltime')">All-time</a>
           </div>
 
 #for period in $periods
@@ -69,10 +71,10 @@
   #end for
           </div>
 #end for
-
-        </div>
+               #include "histgenerator.inc"
       </div>
     </div>
+   </div>
 
     <p class="footnote">
       $gettext("This station is controlled by <a href='https://weewx.com'>WeeWX</a>, an experimental weather software system written in Python.")

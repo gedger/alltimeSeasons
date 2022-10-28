@@ -34,9 +34,9 @@ function setup(widgets) {
 }
 
 function choose_history(id) {
-    choose_div('history', id, ['day', 'week', 'month', 'year']);
-    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear']);
-    choose_col('totals', id, ['week', 'month', 'year', 'rainyear']);
+    choose_div('history', id, ['day', 'week', 'month', 'year', 'alltime']);
+    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear', 'alltime']);
+    choose_col('totals', id, ['week', 'month', 'year', 'rainyear', 'alltime']);
     choose_rainyear(id);
 }
 

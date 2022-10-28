@@ -4,7 +4,7 @@
 #errorCatcher Echo
 #encoding UTF-8
 
-#set $archive_data = [$day, $week, $month, $year, $rainyear]
+#set $archive_data = [$day, $week, $month, $year, $rainyear, $alltime]
 
 <div id="statistics_widget" class="widget">
   <div class="widget_title">
@@ -22,6 +22,7 @@
           <th class="hilo_month">Month</th>
           <th class="hilo_year">Year</th>
           <th class="hilo_rainyear">Rain year</th>
+          <th class="hilo_alltime">All-time</th>
         </tr>
         <tr>
           <td class="label">$obs.label.outTemp</td>

@@ -4,7 +4,7 @@
 #errorCatcher Echo
 #encoding UTF-8
 
-#set $archive_data = [('day', $day), ('week', $week), ('month', $month), ('year', $year), ('rainyear', $rainyear)]
+#set $archive_data = [('day', $day), ('week', $week), ('month', $month), ('year', $year), ('rainyear', $rainyear), ('alltime', $alltime)]
 
 <div id='hilo_widget' class="widget">
   <div class="widget_title">
@@ -27,6 +27,7 @@
         <th class="hilo_rainyear">
             <a onclick="toggle_rainyear()">Rain<br/>Year</a>
         </th>
+        <th class="hilo_alltime">&nbsp;<br/>All-time</th>
         <td></td>
       </tr>
       <tr>

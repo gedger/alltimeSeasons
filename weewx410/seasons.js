@@ -34,8 +34,8 @@ function setup(widgets) {
 }
 
 function choose_history(id) {
-    choose_div('history', id, ['day', 'week', 'month', 'year']);
-    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear']);
+    choose_div('history', id, ['day', 'week', 'month', 'year', 'alltime']);
+    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear', 'alltime']);
     choose_rainyear(id);
 }
 
@@ -52,7 +52,7 @@ function toggle_rainyear() {
         year_type = 'year';
     }
     set_state('year_type', year_type);
-    var id = get_active_div('history', ['day', 'week', 'month', 'year'], 'day');
+    var id = get_active_div('history', ['day', 'week', 'month', 'year', 'alltime'], 'day');
     choose_rainyear(id);
 }
 

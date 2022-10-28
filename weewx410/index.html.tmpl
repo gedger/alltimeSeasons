@@ -42,6 +42,8 @@
                onclick="choose_history('month')">Month</a>
             <a class="button" id="button_history_year"
                onclick="choose_history('year')">Year</a>
+            <a class="button" id="button_history_alltime"
+               onclick="choose_history('alltime')">All-time</a>
           </div>
           <div id="history_day" class="plot_container">
             <img src="daybarometer.png" alt="$obs.label.barometer"/>
@@ -154,6 +156,18 @@
             #if $year.rxCheckPercent.has_data
             <img src="yearrx.png"        alt="$obs.label.rxCheckPercent"/>
             #end if
+          </div>
+          <div id="history_alltime" class="plot_container" style="display:none">
+             <p id=label>Minimum Temperature</p>
+        	   <span id="data">$min_temp_table</span>
+             <p id=label>Average Temperature</p>
+               <span id="data">$avg_temp_table</span>
+             <p id=label>Maximum Temperature</p>
+               <span id="data">$max_temp_table</span>
+             <p id=label>Rainfall (mm)</p>
+               <span id="data">$rain_table</span>
+             <p id=label>Days when rain fell</p>
+               <span id="data">$rain_days_table</span>
           </div>
         </div>
       </div>

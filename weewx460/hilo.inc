@@ -4,7 +4,7 @@
 #errorCatcher Echo
 #encoding UTF-8
 
-#set $timespans = ['day', 'week', 'month', 'year', 'rainyear']
+#set $timespans = ['day', 'week', 'month', 'year', 'rainyear', 'alltime']
 
 ## Get the list of observations from the configuration file, otherwise fallback
 ## to a very rudimentary set of observations.
@@ -36,6 +36,7 @@
         <th class="hilo_rainyear">
           <a onclick="toggle_rainyear()">$gettext("Rain<br/>Year")</a>
         </th>
+        <th class="hilo_alltime">&nbsp;<br/>$gettext("AllTime")</th>
         <td></td>
       </tr>
 

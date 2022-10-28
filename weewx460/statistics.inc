@@ -4,7 +4,7 @@
 #errorCatcher Echo
 #encoding UTF-8
 
-#set $time_tags = [$day, $week, $month, $year, $rainyear]
+#set $time_tags = [$day, $week, $month, $year, $rainyear, $alltime]
 
 ## Get the list of observations from the configuration file, otherwise fallback
 ## to a very rudimentary set of observations.
@@ -31,6 +31,7 @@
           <th class="hilo_month">$gettext("Month")</th>
           <th class="hilo_year">$gettext("Year")</th>
           <th class="hilo_rainyear">$gettext("Rain Year")</th>
+          <th class="hilo_alltime">$gettext("All Time")</th>
         </tr>
 
 #for $x in $observations

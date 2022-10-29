@@ -3,6 +3,23 @@
 #
 # Distributed under the terms of the GNU GENERAL PUBLIC LICENSE
 #
+# Original with modifications for Seasons skin is at
+# https://github.com/gedger/alltimeSeasons
+#
+# And forked by Glenn McKechnie with further modifications at
+# https://github.com/glennmckechnie/alltimeSeasons
+#
+# *30 Oct 2022*
+# Reorganized repo files.
+# Moved original files to weewx410 (the version that the files appear
+# to have come from).
+# Added weewx460 and weewx491 directories with their respective files.
+# Add html diffs to show what has changed for each version.
+# Modified historygenerator.py to break on success (resolves duplicate
+# style strings) also to use weewx4 style logging.
+# Modified layout to show "out of bounds" values as red text.
+# Change 'Total' columns to white backgrounds with bold text.
+
 """Extends the Cheetah generator search list to add html historic data tables in a nice colour scheme.
 
 Tested on Weewx release 4.0.0.
@@ -92,32 +109,22 @@ try:
     # Test for new-style weewx v4 logging by trying to import weeutil.logger
     import weeutil.logger
     import logging
-
     log = logging.getLogger(__name__)
-
     def logdbg(msg):
         log.debug(msg)
-
     def loginf(msg):
         log.info(msg)
-
     def logerr(msg):
         log.error(msg)
-
 except ImportError:
-    # Old-style weewx
-    # logging
+    # Old-style weewx logging
     import syslog
-
     def logmsg(level, msg):
         syslog.syslog(level, 'history generator: %s' % msg)
-
     def logdbg(msg):
         logmsg(syslog.LOG_DEBUG, msg)
-
     def loginf(msg):
         logmsg(syslog.LOG_INFO, msg)
-
     def logerr(msg):
         logmsg(syslog.LOG_ERR, msg)
 
@@ -132,13 +139,7 @@ class MyXSearch(SearchList):
         self.cache_time = 0
 
         self.search_list_extension = {}
-
-# removed for alltimeSeasons skin as bootstrap isnt used
-        # Make bootstrap specific labels in config file available to
-#        if 'BootstrapLabels' in generator.skin_dict:
-#            self.search_list_extension['BootstrapLabels'] = generator.skin_dict['BootstrapLabels']
-#        else:
-#            logdbg("%s: No bootstrap specific labels found" % os.path.basename(__file__))
+        #loginf("table_dict is %s" % self.table_dict)
 
         # Make observation labels available to templates
         if 'Labels' in generator.skin_dict:
@@ -310,27 +311,28 @@ class MyXSearch(SearchList):
             else:
                 format_string = reading.formatter.unit_format_dict[unit_type]
 
-        htmlText = '<table class="table">'
-        htmlText += "<thead>"
-        htmlText += "<tr>"
-        htmlText += "<th>%s</th>" % unit_formatted
+        htmlText = '<table class="table">\n'
+        htmlText += (' ' * 11) + "<thead>\n"
+        htmlText += (' ' * 12) + "<tr>\n"
+        htmlText += (' ' * 13) + "<th>%s</th>\n" % unit_formatted
 
         for mon in table_options.get('monthnames', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']):
-            htmlText += "<th>&nbsp;%s&nbsp;</th>" % mon
+            htmlText += (' ' * 13) + "<th style=\"text-align: center\">&nbsp;%s&nbsp;</th>\n" % mon
 
         if summary_column:
             if 'summary_heading' in table_options:
-                htmlText += "<th></th>"
-                htmlText += "<th align=\"center\">%s</th>\n" % table_options['summary_heading']
+                htmlText += (' ' * 13) + "<th> </th>\n"
+                #htmlText += "<th>%s</th>\n" % table_options['summary_heading']
+                htmlText += (' ' * 13) + "<th style=\"text-align: center\">%s</th>\n" % table_options['summary_heading']
 
-        htmlText += "</tr>"
-        htmlText += "</thead>"
-        htmlText += "<tbody>"
+        htmlText += (' ' * 12) + "</tr>\n"
+        htmlText += (' ' * 11) + "</thead>\n"
+        htmlText += (' ' * 11) + "<tbody>\n"
 
         for year in table_stats.years():
             year_number = datetime.fromtimestamp(year.timespan[0]).year
 
-            htmlLine = (' ' * 8) + "<tr>\n"
+            htmlLine = (' ' * 11) + "<tr>\n"
 
             if NOAA is True:
                 htmlLine += (' ' * 12) + "%s\n" % \
@@ -376,19 +378,18 @@ class MyXSearch(SearchList):
 
 
                 htmlLine += (' ' * 12) + "<td></td>\n"
-                htmlLine += (' ' * 12) + self._colorCell(value[0], format_string, cellColours, center=True)
+                htmlLine += (' ' * 12) + self._colorCell(value[0], format_string, cellColours, center=True, summary_column=True)
 
-            htmlLine += (' ' * 8) + "</tr>\n"
+            htmlLine += (' ' * 11) + "</tr>\n"
 
             htmlText += htmlLine
 
-        #htmlText += (' ' * 8) + "</tr>\n"
-        htmlText += (' ' * 4) + "</tbody>\n"
-        htmlText += "</table>\n"
+        htmlText += (' ' * 11) + "</tbody>\n"
+        htmlText += (' ' * 10) + "</table>\n"
 
         return htmlText
 
-    def _colorCell(self, value, format_string, cellColours, center=False):
+    def _colorCell(self, value, format_string, cellColours, center=False, summary_column=False):
         """Returns a '<td style= background-color: XX; color: YY"> z.zz </td>' html table entry string.
 
         value: Numeric value for the observation
@@ -397,17 +398,32 @@ class MyXSearch(SearchList):
         """
 
         cellText = "<td"
+        c_nter = ""
+        cellText_found = ""
         if center:
-            cellText += " align=\"center\""
+            c_nter = "text-align: center;"
 
-        if value is not None:
+        if (value is not None) and (summary_column == False):
             for c in cellColours:
+                # >= becomes > to remove confusing double entries, or break on success
                 if (value >= float(c[0])) and (value <= float(c[1])):
-                    cellText += " style=\"background-color:%s; color:%s\"" % (c[2], c[3])
+                    # Found one; break on success.
+                    # There's no need to continue with this value, move onto the next one.
+                    cellText_found = " style=\"%s background-color:%s; color:%s\"" % (c_nter, c[2], c[3])
+                    break
+                elif (value <= float(c[0])) or (value > float(c[1])):
+                    # Value is outside the given range so highlight it accordingly
+                    cellText_found = " style=\"text-align: center; color: #FF0F2D\""
+            cellText += cellText_found
             formatted_value = format_string % value
             cellText += "> %s </td>\n" % formatted_value
+        elif summary_column:
+            # If it is the summary column, deal with it differently.
+            formatted_value = format_string % value
+            cellText += " style=\"text-align: center; font-weight: bold\"> %s </td>\n" % formatted_value
         else:
-            cellText += ">-</td>\n"
+            # nothing suitable, so convey that info.
+            cellText += " style=\"text-align: center\">-</td>\n"
         return cellText
 
     def _NoaaCell(self, dt, table_options):

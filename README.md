@@ -9,7 +9,7 @@ Reorganized repo files.
 Moved original files to weewx410 (the version that the files appear to have come from)
 
 Added weewx460 and weewx491 directories with their respective files. Those files can replace your existing Season skin files, or if you've already modified then use the diffs.
-The 'diffs' are .html files that show what has changed for each version. Use either html diff (or both) to assist with the changes. They are included in the hope they calrify what needs to be done.
+The 'diffs' are .html files that show what has changed for each version. Use either html diff (or both) to assist with the changes. They are included in the hope they clarify what needs to be done.
 
 The historygenerator.py file belongs in the weewx directory -- bin/user/historygenerator.py
 

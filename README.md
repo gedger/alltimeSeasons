@@ -1,3 +1,44 @@
+*30 Oct 2022*
+
+The alltimeSeasons addition takes the NOAA data (Monthly/ Yearly Reports) and presents some of the Temperature and Rainfall stats as colored html.
+
+This site updates and modifies the original repo instructions at https://github.com/gedger/alltimeSeasons
+
+Reorganized repo files.
+
+Moved original files to weewx410/ (the version that the files appear to have come from)
+
+Added weewx460/ and weewx491/ directories with their respective files. Those files can replace your existing Season skin files, or if you've already modified those then use the diffs to add only what's needed.
+The 'diffs' are .html files that show what has changed for each version. Use either html diff (or both) to assist with the changes. They are included in the hope they clarify what needs to be done.
+
+The historygenerator.py file belongs in the weewx directory -- bin/user/historygenerator.py
+
+After installation of that file, restart weewx for it to take affect.
+
+The skin modifications you make to utilize that, now installed, historygenerator.py file will happen once you've added them to the skin. Watch your log for errors.
+
+Bugfix:
+
+Modified historygenerator.py to 'break' on success (resolves duplicate style strings)
+
+Enhancement:
+
+Added weewx4 style logging to historygenerator.py
+
+Style changes:
+
+Modified layout to show "out of bounds" values as red text.
+
+Change 'Total' columns to white backgrounds with bold text.
+
+Output html passes https://validator.w3.org tests.
+
+Questions, Issues, Errors? Use the issues button above or use the weewx-users mailing list (google groups)
+
+
+=========== End of fork changes =========
+
+
 # alltimeSeasons skin
 
 ## Summary

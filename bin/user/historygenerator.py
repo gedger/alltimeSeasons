@@ -3,6 +3,23 @@
 #
 # Distributed under the terms of the GNU GENERAL PUBLIC LICENSE
 #
+# Original with modifications for Seasons skin is at
+# https://github.com/gedger/alltimeSeasons
+#
+# And forked by Glenn McKechnie with further modifications at
+# https://github.com/glennmckechnie/alltimeSeasons
+#
+# *30 Oct 2022*
+# Reorganized repo files.
+# Moved original files to weewx410 (the version that the files appear
+# to have come from).
+# Added weewx460 and weewx491 directories with their respective files.
+# Add html diffs to show what has changed for each version.
+# Modified historygenerator.py to break on success (resolves duplicate
+# style strings) also to use weewx4 style logging.
+# Modified layout to show "out of bounds" values as red text.
+# Change 'Total' columns to white backgrounds with bold text.
+
 """Extends the Cheetah generator search list to add html historic data tables in a nice colour scheme.
 
 Tested on Weewx release 4.0.0.
@@ -82,12 +99,34 @@ Adding the section below to your skins.conf file will create these new tags:
 
 from datetime import datetime
 import time
-import syslog
 import os.path
 
 from weewx.cheetahgenerator import SearchList
 from weewx.tags import TimespanBinder
 import weeutil.weeutil
+
+try:
+    # Test for new-style weewx v4 logging by trying to import weeutil.logger
+    import weeutil.logger
+    import logging
+    log = logging.getLogger(__name__)
+    def logdbg(msg):
+        log.debug(msg)
+    def loginf(msg):
+        log.info(msg)
+    def logerr(msg):
+        log.error(msg)
+except ImportError:
+    # Old-style weewx logging
+    import syslog
+    def logmsg(level, msg):
+        syslog.syslog(level, 'history generator: %s' % msg)
+    def logdbg(msg):
+        logmsg(syslog.LOG_DEBUG, msg)
+    def loginf(msg):
+        logmsg(syslog.LOG_INFO, msg)
+    def logerr(msg):
+        logmsg(syslog.LOG_ERR, msg)
 
 class MyXSearch(SearchList):
     def __init__(self, generator):
@@ -98,21 +137,15 @@ class MyXSearch(SearchList):
         # Calculate the tables once every refresh_interval mins
         self.refresh_interval = int(self.table_dict.get('refresh_interval', 5))
         self.cache_time = 0
-        
-        self.search_list_extension = {}
 
-# removed for alltimeSeasons skin as bootstrap isnt used
-        # Make bootstrap specific labels in config file available to
-#        if 'BootstrapLabels' in generator.skin_dict:
-#            self.search_list_extension['BootstrapLabels'] = generator.skin_dict['BootstrapLabels']
-#        else:
-#            syslog.syslog(syslog.LOG_DEBUG, "%s: No bootstrap specific labels found" % os.path.basename(__file__))
+        self.search_list_extension = {}
+        #loginf("table_dict is %s" % self.table_dict)
 
         # Make observation labels available to templates
         if 'Labels' in generator.skin_dict:
             self.search_list_extension['Labels'] = generator.skin_dict['Labels']
         else:
-            syslog.syslog(syslog.LOG_DEBUG, "%s: No observation labels found" % os.path.basename(__file__))
+            logdbg("%s: No observation labels found" % os.path.basename(__file__))
 
     def get_extension_list(self, valid_timespan, db_lookup):
         """For weewx V3.x extensions. Should return a list
@@ -129,11 +162,11 @@ class MyXSearch(SearchList):
         # Time to recalculate?
         if (time.time() - (self.refresh_interval * 60)) > self.cache_time:
             self.cache_time = time.time()
-            
+
             #
             #  The html history tables
             #
-            
+
             t1 = time.time()
             ngen = 0
 
@@ -142,7 +175,7 @@ class MyXSearch(SearchList):
 
                 table_options = weeutil.weeutil.accumulateLeaves(self.table_dict[table])
 
-                
+
                 # Get the binding where the data is allocated
                 binding = table_options.get('data_binding', 'wx_binding')
 
@@ -164,7 +197,7 @@ class MyXSearch(SearchList):
 
                 # Now create a small dictionary with keys 'alltime' and 'seven_day':
                 self.search_list_extension['alltime'] = all_stats
-                          
+
                 # Show all time unless starting date specified
                 startdate = table_options.get('startdate', None)
                 if startdate is not None:
@@ -173,14 +206,14 @@ class MyXSearch(SearchList):
                                       converter=self.generator.converter)
                 else:
                     table_stats = all_stats
-                
+
                 table_name = table + '_table'
                 self.search_list_extension[table_name] = self._statsHTMLTable(table_options, table_stats, table_name, binding, NOAA=noaa)
                 ngen += 1
 
             t2 = time.time()
 
-            syslog.syslog(syslog.LOG_INFO, "%s: Generated %d tables in %.2f seconds" %
+            loginf("%s: Generated %d tables in %.2f seconds" %
                           (os.path.basename(__file__), ngen, t2 - t1))
 
         return [self.search_list_extension]
@@ -194,7 +227,7 @@ class MyXSearch(SearchList):
 
         for i in [table_options['maxvalues'], table_options['colours']]:
             if len(i) != l:
-                syslog.syslog(syslog.LOG_INFO, "%s: minvalues, maxvalues and colours must have the same number of elements in table: %s"
+                loginf("%s: minvalues, maxvalues and colours must have the same number of elements in table: %s"
                               % (os.path.basename(__file__), table_name))
                 return None
 
@@ -220,20 +253,20 @@ class MyXSearch(SearchList):
         if NOAA is True:
             unit_formatted = ""
         else:
-            obs_type = table_options['obs_type']                                  
-            aggregate_type = table_options['aggregate_type']                      
-            converter = table_stats.converter      
-             
+            obs_type = table_options['obs_type']
+            aggregate_type = table_options['aggregate_type']
+            converter = table_stats.converter
+
             # obs_type
-            readingBinder = getattr(table_stats, obs_type) 
-            
+            readingBinder = getattr(table_stats, obs_type)
+
             # Some aggregate come with an argument
             if aggregate_type in ['max_ge', 'max_le', 'min_le', 'sum_ge']:
 
                 try:
                     threshold_value = float(table_options['aggregate_threshold'][0])
                 except KeyError:
-                    syslog.syslog(syslog.LOG_INFO, "%s: Problem with aggregate_threshold. Should be in the format: [value], [units]" %
+                    loginf("%s: Problem with aggregate_threshold. Should be in the format: [value], [units]" %
                                   (os.path.basename(__file__)))
                     return "Could not generate table %s" % table_name
 
@@ -242,21 +275,21 @@ class MyXSearch(SearchList):
                 try:
                     reading = getattr(readingBinder, aggregate_type)((threshold_value, threshold_units))
                 except IndexError:
-                    syslog.syslog(syslog.LOG_INFO, "%s: Problem with aggregate_threshold units: %s" % (os.path.basename(__file__),
+                    loginf("%s: Problem with aggregate_threshold units: %s" % (os.path.basename(__file__),
                                                                                                        str(threshold_units)))
                     return "Could not generate table %s" % table_name
             else:
                 try:
                     reading = getattr(readingBinder, aggregate_type)
                 except KeyError:
-                    syslog.syslog(syslog.LOG_INFO, "%s: aggregate_type %s not found" % (os.path.basename(__file__),
+                    loginf("%s: aggregate_type %s not found" % (os.path.basename(__file__),
                                                                                         aggregate_type))
                     return "Could not generate table %s" % table_name
-            
-            try:        
+
+            try:
                 unit_type = reading.converter.group_unit_dict[reading.value_t[2]]
             except KeyError:
-                syslog.syslog(syslog.LOG_INFO, "%s: obs_type %s no unit found" % (os.path.basename(__file__),
+                loginf("%s: obs_type %s no unit found" % (os.path.basename(__file__),
                                                                                         obs_type))
             unit_formatted = ''
 
@@ -278,27 +311,28 @@ class MyXSearch(SearchList):
             else:
                 format_string = reading.formatter.unit_format_dict[unit_type]
 
-        htmlText = '<table class="table">'
-        htmlText += "    <thead>"
-        htmlText += "        <tr>"
-        htmlText += "        <th>%s</th>" % unit_formatted
+        htmlText = '<table class="table">\n'
+        htmlText += (' ' * 11) + "<thead>\n"
+        htmlText += (' ' * 12) + "<tr>\n"
+        htmlText += (' ' * 13) + "<th>%s</th>\n" % unit_formatted
 
         for mon in table_options.get('monthnames', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']):
-            htmlText += "        <th>%s</th>" % mon
+            htmlText += (' ' * 13) + "<th style=\"text-align: center\">&nbsp;%s&nbsp;</th>\n" % mon
 
         if summary_column:
             if 'summary_heading' in table_options:
-                htmlText += "        <th></th>"
-                htmlText += "        <th align=\"center\">%s</th>\n" % table_options['summary_heading']
+                htmlText += (' ' * 13) + "<th> </th>\n"
+                #htmlText += "<th>%s</th>\n" % table_options['summary_heading']
+                htmlText += (' ' * 13) + "<th style=\"text-align: center\">%s</th>\n" % table_options['summary_heading']
 
-        htmlText += "    </tr>"
-        htmlText += "    </thead>"
-        htmlText += "    <tbody>"
+        htmlText += (' ' * 12) + "</tr>\n"
+        htmlText += (' ' * 11) + "</thead>\n"
+        htmlText += (' ' * 11) + "<tbody>\n"
 
         for year in table_stats.years():
             year_number = datetime.fromtimestamp(year.timespan[0]).year
 
-            htmlLine = (' ' * 8) + "<tr>\n"
+            htmlLine = (' ' * 11) + "<tr>\n"
 
             if NOAA is True:
                 htmlLine += (' ' * 12) + "%s\n" % \
@@ -325,7 +359,7 @@ class MyXSearch(SearchList):
                             value = getattr(obsMonth, aggregate_type)((threshold_value, threshold_units)).value_t
                         except:
                             value = [0, 'count']
-                    else:      
+                    else:
                         value = converter.convert(getattr(obsMonth, aggregate_type).value_t)
 
                     htmlLine += (' ' * 12) + self._colorCell(value[0], format_string, cellColours)
@@ -344,19 +378,18 @@ class MyXSearch(SearchList):
 
 
                 htmlLine += (' ' * 12) + "<td></td>\n"
-                htmlLine += (' ' * 12) + self._colorCell(value[0], format_string, cellColours, center=True)
+                htmlLine += (' ' * 12) + self._colorCell(value[0], format_string, cellColours, center=True, summary_column=True)
 
-            htmlLine += (' ' * 8) + "</tr>\n"
+            htmlLine += (' ' * 11) + "</tr>\n"
 
             htmlText += htmlLine
 
-        htmlText += (' ' * 8) + "</tr>\n"
-        htmlText += (' ' * 4) + "</tbody>\n"
-        htmlText += "</table>\n"
+        htmlText += (' ' * 11) + "</tbody>\n"
+        htmlText += (' ' * 10) + "</table>\n"
 
         return htmlText
 
-    def _colorCell(self, value, format_string, cellColours, center=False):
+    def _colorCell(self, value, format_string, cellColours, center=False, summary_column=False):
         """Returns a '<td style= background-color: XX; color: YY"> z.zz </td>' html table entry string.
 
         value: Numeric value for the observation
@@ -365,23 +398,32 @@ class MyXSearch(SearchList):
         """
 
         cellText = "<td"
-
+        c_nter = ""
+        cellText_found = ""
         if center:
-            cellText += " align=\"center\""
+            c_nter = "text-align: center;"
 
-        if value is not None:
-
-
+        if (value is not None) and (summary_column == False):
             for c in cellColours:
+                # >= becomes > to remove confusing double entries, or break on success
                 if (value >= float(c[0])) and (value <= float(c[1])):
-                    cellText += " style=\"background-color:%s; color:%s\"" % (c[2], c[3])
-
+                    # Found one; break on success.
+                    # There's no need to continue with this value, move onto the next one.
+                    cellText_found = " style=\"%s background-color:%s; color:%s\"" % (c_nter, c[2], c[3])
+                    break
+                elif (value <= float(c[0])) or (value > float(c[1])):
+                    # Value is outside the given range so highlight it accordingly
+                    cellText_found = " style=\"text-align: center; color: #FF0F2D\""
+            cellText += cellText_found
             formatted_value = format_string % value
             cellText += "> %s </td>\n" % formatted_value
-
+        elif summary_column:
+            # If it is the summary column, deal with it differently.
+            formatted_value = format_string % value
+            cellText += " style=\"text-align: center; font-weight: bold\"> %s </td>\n" % formatted_value
         else:
-            cellText += ">-</td>\n"
-
+            # nothing suitable, so convey that info.
+            cellText += " style=\"text-align: center\">-</td>\n"
         return cellText
 
     def _NoaaCell(self, dt, table_options):

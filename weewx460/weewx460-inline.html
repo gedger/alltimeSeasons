@@ -1,0 +1,217 @@
+<html>
+<head>
+<title>Colorized inline diff for WeeWX 4.6.0 files</title>
+</head>
+<style>
+.diffdiv  { border: solid 1px black;           }
+.comment  { color: gray;                       }
+.diff     { color: #8A2BE2;                    }
+.minus3   { color: blue;                       }
+.plus3    { color: maroon;                     }
+.at2      { color: lime;                       }
+.plus     { color: green; background: #E7E7E7; }
+.minus    { color: red;   background: #D7D7D7; }
+.only     { color: purple;                     }
+</style>
+<body>
+<pre>
+<span class="comment"></span><div class='diffdiv'>
+<span class="diff">diff --git a/weewx460/hilo.inc b/weewx460/hilo.inc</span>
+index 8c9ae6b..bbf98ec 100644
+<span class="minus3">--- a/weewx460/hilo.inc</span>
+<span class="plus3">+++ b/weewx460/hilo.inc</span>
+<span class="at2">@@ -4,7 +4,7 @@</span>
+ #errorCatcher Echo
+ #encoding UTF-8
+ 
+<span class="minus">-#set $timespans = ['day', 'week', 'month', 'year', 'rainyear']</span>
+<span class="plus">+#set $timespans = ['day', 'week', 'month', 'year', 'rainyear', 'alltime']</span>
+ 
+ ## Get the list of observations from the configuration file, otherwise fallback
+ ## to a very rudimentary set of observations.
+<span class="at2">@@ -36,6 +36,7 @@</span>
+         &lt;th class="hilo_rainyear"&gt;
+           &lt;a onclick="toggle_rainyear()"&gt;$gettext("Rain&lt;br/&gt;Year")&lt;/a&gt;
+         &lt;/th&gt;
+<span class="plus">+        &lt;th class="hilo_alltime"&gt;&amp;nbsp;&lt;br/&gt;$gettext("AllTime")&lt;/th&gt;</span>
+         &lt;td&gt;&lt;/td&gt;
+       &lt;/tr&gt;
+ </div>
+<div class='diffdiv'>
+
+<span class="diff">diff --git a/weewx460/index.html.tmpl b/weewx460/index.html.tmpl</span>
+index e70d00a..f348f3c 100644
+<span class="minus3">--- a/weewx460/index.html.tmpl</span>
+<span class="plus3">+++ b/weewx460/index.html.tmpl</span>
+<span class="at2">@@ -47,6 +47,8 @@</span>
+                onclick="choose_history('month')"&gt;$gettext("Month")&lt;/a&gt;
+             &lt;a class="button" id="button_history_year"
+                onclick="choose_history('year')"&gt;$gettext("Year")&lt;/a&gt;
+<span class="plus">+            &lt;a class="button" id="button_history_alltime"</span>
+<span class="plus">+               onclick="choose_history('alltime')"&gt;All-time&lt;/a&gt;</span>
+           &lt;/div&gt;
+ 
+ #for period in $periods
+<span class="at2">@@ -69,7 +71,7 @@</span>
+   #end for
+           &lt;/div&gt;
+ #end for
+<span class="minus">-</span>
+<span class="plus">+          #include "histgenerator.inc"</span>
+         &lt;/div&gt;
+       &lt;/div&gt;
+     &lt;/div&gt;</div>
+<div class='diffdiv'>
+
+<span class="diff">diff --git a/weewx460/seasons.js b/weewx460/seasons.js</span>
+index f35bfd1..d84323b 100644
+<span class="minus3">--- a/weewx460/seasons.js</span>
+<span class="plus3">+++ b/weewx460/seasons.js</span>
+<span class="at2">@@ -34,9 +34,9 @@ function setup(widgets) {</span>
+ }
+ 
+ function choose_history(id) {
+<span class="minus">-    choose_div('history', id, ['day', 'week', 'month', 'year']);</span>
+<span class="minus">-    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear']);</span>
+<span class="minus">-    choose_col('totals', id, ['week', 'month', 'year', 'rainyear']);</span>
+<span class="plus">+    choose_div('history', id, ['day', 'week', 'month', 'year', 'alltime']);</span>
+<span class="plus">+    choose_col('hilo', id, ['week', 'month', 'year', 'rainyear', 'alltime']);</span>
+<span class="plus">+    choose_col('totals', id, ['week', 'month', 'year', 'rainyear', 'alltime']);</span>
+     choose_rainyear(id);
+ }
+ </div>
+<div class='diffdiv'>
+
+<span class="diff">diff --git a/weewx460/skin.conf b/weewx460/skin.conf</span>
+index cfa4cad..076b2a8 100644
+<span class="minus3">--- a/weewx460/skin.conf</span>
+<span class="plus3">+++ b/weewx460/skin.conf</span>
+<span class="at2">@@ -92,6 +92,8 @@ SKIN_VERSION = 4.6.0</span>
+     # as well as those listed in https://docs.python.org/3/library/codecs.html#standard-encodings
+     encoding = html_entities
+ 
+<span class="plus">+    search_list_extensions = user.historygenerator.MyXSearch</span>
+<span class="plus">+</span>
+     [[SummaryByMonth]]
+         # Reports that summarize "by month"
+         [[[NOAA_month]]]
+<span class="at2">@@ -124,6 +126,92 @@ SKIN_VERSION = 4.6.0</span>
+             template = rss.xml.tmpl
+             
+ ###############################################################################
+<span class="plus">+############################################################################################</span>
+<span class="plus">+#</span>
+<span class="plus">+# HTML month/year colour coded summary table generator</span>
+<span class="plus">+#</span>
+<span class="plus">+[HistoryReport]</span>
+<span class="plus">+</span>
+<span class="plus">+    #</span>
+<span class="plus">+    # Settings for the HTML month/year colour coded summary table generator</span>
+<span class="plus">+    #</span>
+<span class="plus">+</span>
+<span class="plus">+    # minvalues, maxvalues and colours and fontColours should contain the same number of elements.</span>
+<span class="plus">+    #</span>
+<span class="plus">+    # For example,  the [min_temp] example below, if the minimum temperature measured in</span>
+<span class="plus">+    # a month is between -50 and -10 (degC) then the cell will be shaded in html colour code #0029E5.</span>
+<span class="plus">+    #</span>
+<span class="plus">+    # colours = background colour</span>
+<span class="plus">+    # fontColours = foreground colour [optional, defaults to black if omitted]</span>
+<span class="plus">+</span>
+<span class="plus">+    # Default is temperature scale</span>
+<span class="plus">+    minvalues = -50, -10, -5, 0,  5, 10, 15, 20, 25, 30, 35</span>
+<span class="plus">+    maxvalues = -10, -5,   0, 5, 10, 15, 20, 25, 30, 35, 60</span>
+<span class="plus">+    colours =   "#0029E5", "#0186E7", "#02E3EA", "#04EC97", "#05EF3D", "#2BF207", "#8AF408", "#E9F70A", "#F9A90B", "#FC4D0D", "#FF0F2D"</span>
+<span class="plus">+    fontColours =   "#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000", "#000000", "#000000", "#000000", "#FFFFFF", "#FFFFFF", "#FFFFFF"</span>
+<span class="plus">+    monthnames = Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec</span>
+<span class="plus">+</span>
+<span class="plus">+    # Restrict the size of the table by ignoring everything before startdate</span>
+<span class="plus">+    # Specify in unix epoch time. e.g. 1325376000 is 1-Jan-2012</span>
+<span class="plus">+    #startdate = 1325376000</span>
+<span class="plus">+</span>
+<span class="plus">+    # The Raspberry Pi typically takes 15+ seconds to calculate all the summaries with a few years of weather date.</span>
+<span class="plus">+    # refresh_interval is how often in minutes the tables are calculated.</span>
+<span class="plus">+    refresh_interval = 60</span>
+<span class="plus">+</span>
+<span class="plus">+    [[min_temp]]</span>
+<span class="plus">+        obs_type = outTemp                 # obs_type can be any weewx reading</span>
+<span class="plus">+        aggregate_type = min               # Any of these: 'sum', 'count', 'avg', 'max', 'min'</span>
+<span class="plus">+</span>
+<span class="plus">+        summary_column = true</span>
+<span class="plus">+        summary_heading = Min</span>
+<span class="plus">+</span>
+<span class="plus">+    #</span>
+<span class="plus">+    # Can also use these aggregate_types:  'max_ge', 'max_le', 'min_le', 'sum_ge' to count days</span>
+<span class="plus">+    # where an observation is ge: greater of equalto, or le: lessthan or equal to a threshold value</span>
+<span class="plus">+    # To specify this threshold, use: aggregate_threshold = [value], [units]</span>
+<span class="plus">+    #</span>
+<span class="plus">+    # e.g Specify temperature threshold of 20C:  aggregate_threshold = 20, degree_C</span>
+<span class="plus">+    #</span>
+<span class="plus">+    [[max_temp]]</span>
+<span class="plus">+            obs_type = outTemp</span>
+<span class="plus">+            aggregate_type = max</span>
+<span class="plus">+</span>
+<span class="plus">+            summary_column = true</span>
+<span class="plus">+            summary_heading = Max</span>
+<span class="plus">+</span>
+<span class="plus">+        [[avg_temp]]</span>
+<span class="plus">+        obs_type = outTemp</span>
+<span class="plus">+        aggregate_type = avg</span>
+<span class="plus">+</span>
+<span class="plus">+        summary_column = true</span>
+<span class="plus">+        summary_heading = Avg</span>
+<span class="plus">+</span>
+<span class="plus">+    [[rain]]</span>
+<span class="plus">+            obs_type = rain</span>
+<span class="plus">+            aggregate_type = sum</span>
+<span class="plus">+</span>
+<span class="plus">+            minvalues = 0, 25, 50, 75, 100, 150   # Override default temperature colour scheme with rain specific scale</span>
+<span class="plus">+            maxvalues = 25, 50, 75, 100, 150, 1000</span>
+<span class="plus">+            colours = "#E0F8E0", "#A9F5A9", "#58FA58", "#2EFE2E", "#01DF01", "#01DF01"</span>
+<span class="plus">+            fontColours = "#000000", "#000000", "#000000", "#000000", "#000000", "#000000"</span>
+<span class="plus">+</span>
+<span class="plus">+            summary_column = true</span>
+<span class="plus">+            summary_heading = Total</span>
+<span class="plus">+</span>
+<span class="plus">+        [[rain_days]]</span>
+<span class="plus">+        obs_type = rain</span>
+<span class="plus">+        units = Days                        # Override default table units label</span>
+<span class="plus">+        aggregate_type = sum_ge</span>
+<span class="plus">+        aggregate_threshold = 1, mm</span>
+<span class="plus">+        minvalues = 0, 6,  12, 18, 24, 30   # Override default temperature colour scheme with rain specific scale</span>
+<span class="plus">+        maxvalues = 6, 12, 18, 24, 30, 50</span>
+<span class="plus">+        colours = "#E0F8E0", "#A9F5A9", "#58FA58", "#2EFE2E", "#01DF01", "#01DF01"</span>
+<span class="plus">+        fontColours = "#000000", "#000000", "#000000", "#000000", "#000000", "#000000"</span>
+<span class="plus">+</span>
+<span class="plus">+        summary_column = true</span>
+<span class="plus">+        summary_heading = Total</span>
+<span class="plus">+</span>
+ 
+ # The CopyGenerator copies files from one location to another.
+ </div>
+<div class='diffdiv'>
+
+<span class="diff">diff --git a/weewx460/statistics.inc b/weewx460/statistics.inc</span>
+index b8ec2bc..5a7bf24 100644
+<span class="minus3">--- a/weewx460/statistics.inc</span>
+<span class="plus3">+++ b/weewx460/statistics.inc</span>
+<span class="at2">@@ -4,7 +4,7 @@</span>
+ #errorCatcher Echo
+ #encoding UTF-8
+ 
+<span class="minus">-#set $time_tags = [$day, $week, $month, $year, $rainyear]</span>
+<span class="plus">+#set $time_tags = [$day, $week, $month, $year, $rainyear, $alltime]</span>
+ 
+ ## Get the list of observations from the configuration file, otherwise fallback
+ ## to a very rudimentary set of observations.
+<span class="at2">@@ -31,6 +31,7 @@</span>
+           &lt;th class="hilo_month"&gt;$gettext("Month")&lt;/th&gt;
+           &lt;th class="hilo_year"&gt;$gettext("Year")&lt;/th&gt;
+           &lt;th class="hilo_rainyear"&gt;$gettext("Rain Year")&lt;/th&gt;
+<span class="plus">+          &lt;th class="hilo_alltime"&gt;$gettext("All Time")&lt;/th&gt;</span>
+         &lt;/tr&gt;
+ 
+ #for $x in $observations</div>
+
+</pre>
+</body>
+</html>
